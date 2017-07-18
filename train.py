@@ -93,7 +93,6 @@ class Labeler:
             indexes.append(idx)
 
         for iter in range(self.hyperParams.maxIter):
-            cost  =  0
             print('###Iteration' + str(iter) + "###")
             random.shuffle(indexes)
             for idx in range(len(trainExamples)):
@@ -102,11 +101,10 @@ class Labeler:
                 exam = trainExamples[indexes[idx]]
                 lstm_feats = self.model(exam.feat)
                 loss = self.model.crf.neg_log_likelihood(lstm_feats, exam.labelIndexs)
-                cost += loss
                 loss.backward()
                 optimizer.step()
                 if (idx + 1) % self.hyperParams.verboseIter == 0:
-                    print('current: ', idx + 1,  ", cost:", cost.data[0])
+                    print('current: ', idx + 1,  ", cost:", loss.data[0])
 
             eval_dev = Eval()
             for idx in range(len(devExamples)):
