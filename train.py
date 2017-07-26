@@ -84,6 +84,7 @@ class Labeler:
 
         print("Training Instance: ", len(trainInsts))
         print("Dev Instance: ", len(devInsts))
+        print("Test Instance: ", len(testInsts))
 
         self.createAlphabet(trainInsts)
 

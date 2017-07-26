@@ -22,9 +22,6 @@ class RNNLabeler(nn.Module):
         sentSize = len(feat.wordIndexs)
         wordRepresents = self.wordEmb(feat.wordIndexs)
 
-        #if self.hyperParams.wordFineTune:
-            #wordRepresents = torch.autograd.Variable(wordRepresents)
-
         LSTMOutputs, self.LSTMHidden = self.LSTM(wordRepresents.view(sentSize, 1, -1), self.LSTMHidden)
         tagHiddens = self.linearLayer(LSTMOutputs.view(sentSize, -1))
         return tagHiddens
