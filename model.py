@@ -10,7 +10,7 @@ class RNNLabeler(nn.Module):
         self.wordEmb = nn.Embedding(hyperParams.wordNum, hyperParams.wordEmbSize)
         self.LSTM = nn.LSTM(hyperParams.wordEmbSize, hyperParams.rnnHiddenSize // 2, bidirectional=True)
         self.LSTMHidden = self.init_hidden()
-        self.linearLayer = nn.Linear(hyperParams.rnnHiddenSize, hyperParams.labelSize, bias=False)
+        self.linearLayer = nn.Linear(hyperParams.rnnHiddenSize, hyperParams.labelSize, bias=True)
         self.crf = CRF(hyperParams.labelSize)
 
     def init_hidden(self):

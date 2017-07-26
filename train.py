@@ -76,9 +76,11 @@ class Labeler:
 
         trainInsts = reader.readInstances(train_file)
         devInsts = reader.readInstances(dev_file)
+        testInsts = reader.readInstances(test_file)
 
         trainExamples = self.instance2Example(trainInsts)
         devExamples = self.instance2Example(devInsts)
+        testExamples = self.instance2Example(testInsts)
 
         print("Training Instance: ", len(trainInsts))
         print("Dev Instance: ", len(devInsts))
@@ -91,7 +93,6 @@ class Labeler:
         indexes = []
         for idx in range(len(trainExamples)):
             indexes.append(idx)
-
         for iter in range(self.hyperParams.maxIter):
             print('###Iteration' + str(iter) + "###")
             random.shuffle(indexes)
@@ -110,7 +111,15 @@ class Labeler:
             for idx in range(len(devExamples)):
                 predictLabels = self.predict(devExamples[idx])
                 devInsts[idx].evalPRF(predictLabels, eval_dev)
+            print('Dev: ', end="")
             eval_dev.getFscore()
+
+            eval_test = Eval()
+            for idx in range(len(testExamples)):
+                predictLabels = self.predict(testExamples[idx])
+                testInsts[idx].evalPRF(predictLabels, eval_test)
+            print('Test: ', end="")
+            eval_test.getFscore()
 
 
     def predict(self, exam):

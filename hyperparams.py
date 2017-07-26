@@ -3,7 +3,7 @@ class HyperParams:
         self.wordNum = 0
         self.labelSize = 0
 
-        self.maxIter = 1000
+        self.maxIter = 10000
         self.verboseIter = 100
         self.wordCutOff = 0
         self.wordEmbSize = 100
@@ -11,8 +11,9 @@ class HyperParams:
         self.rnnHiddenSize = 100
         self.thread = 1
         self.learningRate = 0.01
-        self.maxInstance = -1
+        self.maxInstance = 1
         self.batch = 1
+
     def show(self):
         print('wordCutOff = ', self.wordCutOff)
         print('wordEmbSize = ', self.wordEmbSize)
