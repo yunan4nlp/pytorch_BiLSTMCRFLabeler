@@ -52,8 +52,6 @@ class CRF(nn.Module):
         init_score = torch.Tensor(1, self.labelSize).fill_(0)
         forward_var = autograd.Variable(init_score)
         back = []
-        #print(feats[0].view(1,-1).expand(1, self.labelSize))
-        #print(feats[0])
         for idx in range(len(feats)):
             feat = feats[idx]
             bptrs_t = []

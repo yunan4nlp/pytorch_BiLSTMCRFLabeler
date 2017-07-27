@@ -9,7 +9,6 @@ from instance import Feature
 from instance import Example
 from hyperparams import HyperParams
 from model import RNNLabeler
-from hyperparams import Alphabet
 from eval import Eval
 
 
@@ -18,10 +17,9 @@ class Labeler:
         self.word_state = {}
         self.label_state = {}
         self.hyperParams = HyperParams()
-        self.wordAlpha = Alphabet()
-        self.labelAlpha = Alphabet()
 
-    def createAlphabet(self, trainInsts):
+    def createAlphabet(self, trainInsts, devInsts, testInsts):
+        print("create alpha.................")
         for inst in trainInsts:
             for w in inst.words:
                 if w not in self.word_state:
@@ -35,24 +33,43 @@ class Labeler:
                 else:
                     self.label_state[l] += 1
 
-        self.wordAlpha.initial(self.word_state, self.hyperParams.wordCutOff)
-        self.labelAlpha.initial(self.label_state)
+        print("word state:", len(self.word_state))
+        self.addTestAlpha(devInsts)
+        print("word state:", len(self.word_state))
+        self.addTestAlpha(testInsts)
+        print("word state:", len(self.word_state))
 
-        self.labelAlpha.set_fixed_flag(True)
-        self.wordAlpha.set_fixed_flag(True)
+        self.word_state[self.hyperParams.unk] = self.hyperParams.wordCutOff + 1
+        self.hyperParams.wordAlpha.initial(self.word_state, self.hyperParams.wordCutOff)
+        self.hyperParams.wordAlpha.set_fixed_flag(True)
+        self.hyperParams.wordNum = self.hyperParams.wordAlpha.m_size
+        self.hyperParams.unkWordID = self.hyperParams.wordAlpha.from_string(self.hyperParams.unk)
 
-        self.hyperParams.wordNum = self.wordAlpha.m_size
-        self.hyperParams.labelSize = self.labelAlpha.m_size
+        self.hyperParams.labelAlpha.initial(self.label_state)
+        self.hyperParams.labelAlpha.set_fixed_flag(True)
+        self.hyperParams.labelSize = self.hyperParams.labelAlpha.m_size
 
+        print("Label num: ", self.hyperParams.labelSize)
+        print("Word num: ", self.hyperParams.wordNum)
 
-        print("word num: ", self.hyperParams.wordNum)
-        print("label num: ", self.hyperParams.labelSize)
+    def addTestAlpha(self, insts):
+        print("Add test alpha.............")
+        if self.hyperParams.wordFineTune == False:
+            for inst in insts:
+                for w in inst.words:
+                    if (w not in self.word_state):
+                        self.word_state[w] = 1
+                    else:
+                        self.word_state[w] += 1
 
     def extractFeature(self, inst):
         feat = Feature()
         for w in inst.words:
-            wordId = self.wordAlpha.from_string(w)
-            feat.wordIndexs.append(wordId)
+            wordId = self.hyperParams.wordAlpha.from_string(w)
+            if wordId == -1:
+                feat.wordIndexs.append(self.hyperParams.unkWordID)
+            else:
+                feat.wordIndexs.append(wordId)
         feat.wordIndexs = torch.autograd.Variable(torch.LongTensor(feat.wordIndexs))
         return feat
 
@@ -62,11 +79,12 @@ class Labeler:
             example = Example()
             example.feat = self.extractFeature(inst)
             for l in inst.labels:
-                labelId = self.labelAlpha.from_string(l)
+                labelId = self.hyperParams.labelAlpha.from_string(l)
                 example.labelIndexs.append(labelId)
             example.labelIndexs = torch.autograd.Variable(torch.LongTensor(example.labelIndexs))
             exams.append(example)
         return exams
+
 
 
     def train(self, train_file, dev_file, test_file):
@@ -78,18 +96,19 @@ class Labeler:
         devInsts = reader.readInstances(dev_file)
         testInsts = reader.readInstances(test_file)
 
-        trainExamples = self.instance2Example(trainInsts)
-        devExamples = self.instance2Example(devInsts)
-        testExamples = self.instance2Example(testInsts)
-
         print("Training Instance: ", len(trainInsts))
         print("Dev Instance: ", len(devInsts))
         print("Test Instance: ", len(testInsts))
 
-        self.createAlphabet(trainInsts)
+        self.createAlphabet(trainInsts, devInsts, testInsts)
+
+        trainExamples = self.instance2Example(trainInsts)
+        devExamples = self.instance2Example(devInsts)
+        testExamples = self.instance2Example(testInsts)
 
         self.model = RNNLabeler(self.hyperParams)
-        optimizer = torch.optim.Adagrad(self.model.parameters(), lr=self.hyperParams.learningRate)
+        parameters = filter(lambda p: p.requires_grad, self.model.parameters())
+        optimizer = torch.optim.Adagrad(parameters, lr=self.hyperParams.learningRate)
 
         indexes = []
         for idx in range(len(trainExamples)):
@@ -128,7 +147,7 @@ class Labeler:
         _, best_path = self.model.crf._viterbi_decode(tag_hiddens)
         predictLabels = []
         for idx in range(len(best_path)):
-            predictLabels.append(self.labelAlpha.from_id(best_path[idx]))
+            predictLabels.append(self.hyperParams.labelAlpha.from_id(best_path[idx]))
         return predictLabels
 
     def getMaxIndex(self, tag_score):
@@ -154,5 +173,5 @@ parser.add_option("--test", dest="testFile",
 
 (options, args) = parser.parse_args()
 l = Labeler()
-l.train(options.trainFile, options.devFile, options.devFile)
+l.train(options.trainFile, options.devFile, options.testFile)
 

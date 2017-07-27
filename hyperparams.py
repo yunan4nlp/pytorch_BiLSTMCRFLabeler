@@ -3,17 +3,23 @@ class HyperParams:
         self.wordNum = 0
         self.labelSize = 0
 
+        self.unk = '-unk-'
+        self.unkWordID = 0
+
         self.maxIter = 10000
         self.verboseIter = 100
         self.wordCutOff = 0
         self.wordEmbSize = 100
-        self.wordFineTune = True
+        self.wordFineTune = False
+        self.wordEmbFile = "E:\\py_workspace\\my_rnn_crf\\data\\w2v103100-en"
         self.rnnHiddenSize = 100
-        self.thread = 1
+        self.thread = 2
         self.learningRate = 0.01
-        self.maxInstance = 1
+        self.maxInstance = -1
         self.batch = 1
 
+        self.wordAlpha = Alphabet()
+        self.labelAlpha = Alphabet()
     def show(self):
         print('wordCutOff = ', self.wordCutOff)
         print('wordEmbSize = ', self.wordEmbSize)
