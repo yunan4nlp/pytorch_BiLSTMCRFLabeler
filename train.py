@@ -95,7 +95,6 @@ class Labeler:
         trainInsts = reader.readInstances(train_file)
         devInsts = reader.readInstances(dev_file)
         testInsts = reader.readInstances(test_file)
-
         print("Training Instance: ", len(trainInsts))
         print("Dev Instance: ", len(devInsts))
         print("Test Instance: ", len(testInsts))

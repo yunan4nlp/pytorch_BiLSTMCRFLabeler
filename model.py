@@ -22,7 +22,7 @@ class RNNLabeler(nn.Module):
                 torch.autograd.Variable(torch.randn(2, 1, self.hyperParams.rnnHiddenSize // 2)))
 
     def load_pretrain(self, file, alpha):
-        f = open(file)
+        f = open(file, encoding='utf8')
         allLines = f.readlines()
         indexs = []
         info = allLines[0].strip().split(' ')
@@ -61,7 +61,7 @@ class RNNLabeler(nn.Module):
     def forward(self, feat):
         sentSize = len(feat.wordIndexs)
         wordRepresents = self.wordEmb(feat.wordIndexs)
-        LSTMOutputs, self.LSTMHidden = self.LSTM(wordRepresents.view(sentSize, 1, -1), self.LSTMHidden)
+        LSTMOutputs, _ = self.LSTM(wordRepresents.view(sentSize, 1, -1), self.LSTMHidden)
         tagHiddens = self.linearLayer(LSTMOutputs.view(sentSize, -1))
         return tagHiddens
 

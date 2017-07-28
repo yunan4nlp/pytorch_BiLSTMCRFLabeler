@@ -11,11 +11,12 @@ class HyperParams:
         self.wordCutOff = 0
         self.wordEmbSize = 100
         self.wordFineTune = False
-        self.wordEmbFile = "E:\\py_workspace\\my_rnn_crf\\data\\w2v103100-en"
+        #self.wordEmbFile = "E:\\py_workspace\\my_rnn_crf\\data\\glove.twitter.27B.100d.txt"
+        self.wordEmbFile = ""
         self.rnnHiddenSize = 100
-        self.thread = 2
+        self.thread = 1
         self.learningRate = 0.01
-        self.maxInstance = -1
+        self.maxInstance = 1
         self.batch = 1
 
         self.wordAlpha = Alphabet()
