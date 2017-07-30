@@ -7,7 +7,7 @@ class HyperParams:
         self.unkWordID = 0
 
         self.maxIter = 10000
-        self.verboseIter = 100
+        self.verboseIter = 10
         self.wordCutOff = 0
         self.wordEmbSize = 100
         self.wordFineTune = False
@@ -15,8 +15,8 @@ class HyperParams:
         self.wordEmbFile = ""
         self.rnnHiddenSize = 100
         self.thread = 1
-        self.learningRate = 0.01
-        self.maxInstance = 1
+        self.learningRate = 0.1
+        self.maxInstance = 20
         self.batch = 1
 
         self.wordAlpha = Alphabet()
